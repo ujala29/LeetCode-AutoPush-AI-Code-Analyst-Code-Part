@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mentor Chat</title>
+    <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+    <div class="chat-header">
+        <div class="chat-title">AI Mentor</div>
+        <div class="problem-slug" id="current-problem">two-sum</div>
+    </div>
+
+    <div class="chat-messages" id="messages">
+        <div class="message bot">
+            <div class="message-content">
+                Hi! I'm your personalized DSA mentor. I know your solving history and can help you understand problems better. What would you like to know about this problem?
+            </div>
+        </div>
+    </div>
+
+    <div class="suggested-prompts">
+        <button class="prompt-chip" data-prompt="Why does this approach work?">Why does this approach work?</button>
+        <button class="prompt-chip" data-prompt="What should I solve next?">What should I solve next?</button>
+        <button class="prompt-chip" data-prompt="Explain the time complexity">Explain the time complexity</button>
+    </div>
+
+    <div class="chat-input">
+        <input type="text" id="message-input" placeholder="Ask me anything about DSA..." maxlength="500">
+        <button id="send-btn" disabled>Send</button>
+    </div>
+
+    <div class="typing-indicator" id="typing" style="display: none;">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <script src="sidebar.js"></script>
+</body>
+</html>

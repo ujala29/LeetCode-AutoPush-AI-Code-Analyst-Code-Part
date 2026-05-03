@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode AI Journal</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="topics">Topics</button>
+        <button class="tab-btn" data-tab="settings">Settings</button>
+    </div>
+
+    <div id="dashboard-tab" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-card streak-card">
+                <div class="streak-number" id="streak-num">0</div>
+                <div class="streak-label">Day Streak 🔥</div>
+                <div class="best-streak" id="best-streak">Best: 0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-solved">0</div>
+                <div class="stat-label">Total Solved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="easy-count">0</div>
+                <div class="stat-label">Easy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="medium-count">0</div>
+                <div class="stat-label">Medium</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="hard-count">0</div>
+                <div class="stat-label">Hard</div>
+            </div>
+        </div>
+
+        <div id="weak-alert" class="alert" style="display: none;">
+            <strong>Weak Areas:</strong> <span id="weak-topics"></span>
+        </div>
+
+        <div class="recent-solves">
+            <h3>Recent Solves</h3>
+            <div id="recent-list">
+                <div class="no-data">No solves yet</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="topics-tab" class="tab-content">
+        <div class="topics-chart">
+            <div id="topics-list">
+                <div class="no-data">No topic data yet</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-tab" class="tab-content">
+        <div class="settings-form">
+            <div class="setting-group">
+                <label for="truefoundry-key">TrueFoundry API Key</label>
+                <div class="input-wrapper">
+                    <input type="password" id="truefoundry-key" placeholder="eyJhbGciOiJSUzI1NiIs...">
+                    <button class="toggle-visibility" data-target="truefoundry-key">👁️</button>
+                </div>
+                <span id="truefoundry-key-status" class="key-status" style="display:none;">✓ Configured</span>
+            </div>
+
+            <div class="setting-group">
+                <label for="github-token">GitHub Token</label>
+                <div class="input-wrapper">
+                    <input type="password" id="github-token" placeholder="ghp_...">
+                    <button class="toggle-visibility" data-target="github-token">👁️</button>
+                </div>
+                <span id="github-token-status" class="key-status" style="display:none;">✓ Configured</span>
+            </div>
+
+            <div class="settings-info">
+                <p><strong>Note:</strong> Keys are encrypted with AES-GCM and stored locally in your browser.</p>
+            </div>
+
+            <button id="save-settings" class="save-btn">Save Settings</button>
+            <div id="save-status"></div>
+
+            <div class="help-links">
+                <a href="https://github.com/settings/tokens" target="_blank">Get GitHub Token</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -5,10 +5,8 @@ import { updateTracker } from './utils/tracker.js';
 import { buildReadme } from './utils/readme-builder.js';
 import { decryptValue } from './utils/crypto.js';
 
-// Global set to track processed submissions
-let processedSubmissions = new Set();
+const processedSubmissions = new Set();
 
-// Listen for messages from content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SUBMISSION_ACCEPTED') {
     handleSubmissionAccepted(message.payload, sender);
@@ -17,7 +15,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.local.get(['tracker'], (result) => {
       sendResponse(result.tracker || {});
     });
-    return true; // Keep message channel open for async response
+    return true;
   } else if (message.type === 'AI_CHAT') {
     handleAIChat(message.messages, message.context).then(reply => {
       sendResponse({ reply });
@@ -29,45 +27,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function handleSubmissionAccepted(payload, sender) {
-  console.log('[LeetCode AI] Processing submission:', payload.slug, 'submissionId:', payload.submissionId);
+  if (payload.submissionId && processedSubmissions.has(payload.submissionId)) return;
+  if (payload.submissionId) processedSubmissions.add(payload.submissionId);
 
-  // Check for duplicate processing
-  if (payload.submissionId && processedSubmissions.has(payload.submissionId)) {
-    console.log('[LeetCode AI] Submission already processed, skipping:', payload.submissionId);
-    return;
-  }
-
-  // Mark as processed
-  if (payload.submissionId) {
-    processedSubmissions.add(payload.submissionId);
-  }
+  const notify = (status, message) => {
+    if (sender?.tab?.id) {
+      chrome.tabs.sendMessage(sender.tab.id, { type: 'PROCESSING_COMPLETE', status, message });
+    }
+  };
 
   try {
-    // Fetch solution code from LeetCode submission API
     const code = payload.code || await fetchLeetCodeSubmissionCode(payload.submissionId);
-    if (!code) {
-      throw new Error('Could not retrieve submission code from LeetCode');
-    }
+    if (!code) throw new Error('Could not retrieve submission code from LeetCode');
 
-    // Step 1: Fetch full metadata
     const meta = await fetchLeetCodeMeta(payload.slug);
     const fullMeta = { ...payload.meta, ...meta };
-
-    // Step 2: Analyze with Azure OpenAI (no API key needed from storage)
     const analysis = await analyzeWithClaude({ code, lang: payload.lang, meta: fullMeta });
 
-    // Step 3: Build date and paths
-    const now = new Date();
-    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const year = dateStr.slice(0, 4);
-    const month = dateStr.slice(5, 7);
-    const monthPath = `${year}/${month}`;
-    const problemPath = `${monthPath}/${dateStr}_${payload.slug}`;
+    const dateStr = new Date().toISOString().split('T')[0];
+    const problemPath = `${dateStr.slice(0, 7).replace('-', '/')}/${dateStr}_${payload.slug}`;
 
-    // Step 4: Build README
-    const readmeContent = buildReadme({ slug: payload.slug, code: payload.code, lang: payload.lang, meta: fullMeta, analysis, dateStr });
-
-    // Step 5: Prepare files for commit
     const files = [
       {
         path: `${problemPath}/solution.${getFileExtension(payload.lang)}`,
@@ -75,56 +54,37 @@ async function handleSubmissionAccepted(payload, sender) {
       },
       {
         path: `${problemPath}/README.md`,
-        content: readmeContent
+        content: buildReadme({ slug: payload.slug, code: payload.code, lang: payload.lang, meta: fullMeta, analysis, dateStr })
       }
     ];
 
-    // Step 7: Commit solution files
-    const commitMessage = `[${dateStr}] ${fullMeta.title} — ${analysis.essence}`;
-    await commitToGitHub(files, commitMessage);
+    await commitToGitHub(files, `[${dateStr}] ${fullMeta.title} — ${analysis.essence}`);
 
-    // Step 8: Update tracker
     const { tracker } = await chrome.storage.local.get(['tracker']);
     const updatedTracker = updateTracker(tracker || {}, { slug: payload.slug, dateStr, meta: fullMeta, analysis });
 
-    // Step 9: Commit tracker.json and root README
-    const trackerContent = JSON.stringify(updatedTracker, null, 2);
-    const rootReadmeContent = buildRootReadme(updatedTracker);
+    await commitToGitHub(
+      [
+        { path: 'tracker.json', content: JSON.stringify(updatedTracker, null, 2) },
+        { path: 'README.md', content: buildRootReadme(updatedTracker) }
+      ],
+      `update stats — ${dateStr}`
+    );
 
-    const rootFiles = [
-      { path: 'tracker.json', content: trackerContent },
-      { path: 'README.md', content: rootReadmeContent }
-    ];
-
-    await commitToGitHub(rootFiles, `Update analytics — ${dateStr}`);
-
-    // Step 10: Save updated tracker locally
     await chrome.storage.local.set({ tracker: updatedTracker });
+    notify('success');
 
-    console.log('[LeetCode AI] Successfully processed and committed:', payload.slug);
-
-    // Notify content script of success
-    if (sender && sender.tab && sender.tab.id) {
-      chrome.tabs.sendMessage(sender.tab.id, { type: 'PROCESSING_COMPLETE', status: 'success' });
-    }
-
-  } catch (error) {
-    console.error('[LeetCode AI] Error processing submission:', error);
-    if (sender && sender.tab && sender.tab.id) {
-      chrome.tabs.sendMessage(sender.tab.id, { type: 'PROCESSING_COMPLETE', status: 'error', message: error.message });
-    }
+  } catch (err) {
+    console.error('submission failed:', err);
+    notify('error', err.message);
   }
 }
 
-async function handleAIChat(messages, context) {
+async function handleAIChat(messages) {
   const { truefoundryKey: encryptedKey, tracker } = await chrome.storage.local.get(['truefoundryKey', 'tracker']);
-  if (!encryptedKey) {
-    throw new Error('TrueFoundry API key not configured. Please check your extension settings.');
-  }
-  const apiKey = await decryptValue(encryptedKey);
-  const userTracker = tracker || {};
+  if (!encryptedKey) throw new Error('TrueFoundry API key not configured. Please check Settings.');
 
-  const systemPrompt = buildChatSystemPrompt(userTracker);
+  const apiKey = await decryptValue(encryptedKey);
 
   const response = await fetch(`${BASE_URL}chat/completions`, {
     method: 'POST',
@@ -135,7 +95,7 @@ async function handleAIChat(messages, context) {
     body: JSON.stringify({
       model: MODEL,
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: buildChatSystemPrompt(tracker || {}) },
         ...messages
       ],
       max_tokens: 800,
@@ -143,31 +103,31 @@ async function handleAIChat(messages, context) {
     })
   });
 
-  if (!response.ok) {
-    throw new Error(`TrueFoundry API error: ${response.status}`);
-  }
+  if (!response.ok) throw new Error(`TrueFoundry error: ${response.status}`);
 
   const data = await response.json();
   return data.choices[0].message.content;
 }
 
 function buildChatSystemPrompt(tracker) {
-  const topics = tracker.topics || {};
-  const sortedTopics = Object.entries(topics).sort((a, b) => b[1] - a[1]);
-  const topTopics = sortedTopics.slice(0, 5).map(([topic, count]) => `${topic} (${count})`).join(', ');
+  const topTopics = Object.entries(tracker.topics || {})
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([t, c]) => `${t} (${c})`)
+    .join(', ');
 
   const weakTopics = (tracker.weakTopics || []).slice(0, 5).join(', ');
-
-  const streak = tracker.streak?.current || 0;
-
-  const recentSolves = (tracker.solves || []).slice(-5).map(s => `${s.title} (${s.difficulty}) — ${s.essence}`).join('; ');
+  const recentSolves = (tracker.solves || [])
+    .slice(-5)
+    .map(s => `${s.title} (${s.difficulty}) — ${s.essence}`)
+    .join('; ');
 
   return `You are a personalized DSA mentor for this user.
 
 Their profile:
 - Strongest topics: ${topTopics || 'None yet'}
 - Weakest / not attempted: ${weakTopics || 'None identified'}
-- Current streak: ${streak} days
+- Current streak: ${tracker.streak?.current || 0} days
 - Last solved: ${recentSolves || 'None yet'}
 
 Answer specifically to their skill level and history. Reference their past solves when relevant. Suggest next problems from their weak areas when asked.`;
@@ -175,17 +135,11 @@ Answer specifically to their skill level and history. Reference their past solve
 
 function buildRootReadme(tracker) {
   const total = tracker.solves?.length || 0;
-  const streak = tracker.streak?.current || 0;
-  const bestStreak = tracker.streak?.best || 0;
-
-  const difficulty = tracker.difficulty || {};
-  const easy = difficulty.Easy || 0;
-  const medium = difficulty.Medium || 0;
-  const hard = difficulty.Hard || 0;
-
+  const { current: streak = 0, best: bestStreak = 0 } = tracker.streak || {};
+  const { Easy: easy = 0, Medium: medium = 0, Hard: hard = 0 } = tracker.difficulty || {};
   const recent = (tracker.solves || []).slice(-10).reverse();
 
-  let markdown = `# LeetCode AI Journal
+  let md = `# LeetCode AI Journal
 
 Auto-generated dashboard from your LeetCode solving journey.
 
@@ -200,33 +154,21 @@ Auto-generated dashboard from your LeetCode solving journey.
 |------|---------|------------|----------|
 `;
 
-  recent.forEach(solve => {
-    markdown += `| ${solve.date} | [${solve.title}](https://leetcode.com/problems/${solve.slug}) | ${solve.difficulty} | ${solve.approach} |\n`;
+  recent.forEach(s => {
+    md += `| ${s.date} | [${s.title}](https://leetcode.com/problems/${s.slug}) | ${s.difficulty} | ${s.approach} |\n`;
   });
 
-  return markdown;
+  return md;
 }
 
 function getFileExtension(lang) {
   const map = {
-    'python': 'py',
-    'python3': 'py',
-    'java': 'java',
-    'cpp': 'cpp',
-    'c++': 'cpp',
-    'c': 'c',
-    'javascript': 'js',
-    'typescript': 'ts',
-    'go': 'go',
-    'rust': 'rs',
-    'kotlin': 'kt',
-    'swift': 'swift',
-    'ruby': 'rb',
-    'php': 'php',
-    'scala': 'scala',
-    'racket': 'rkt',
-    'erlang': 'erl',
-    'elixir': 'ex'
+    python: 'py', python3: 'py', java: 'java',
+    cpp: 'cpp', 'c++': 'cpp', c: 'c',
+    javascript: 'js', typescript: 'ts',
+    go: 'go', rust: 'rs', kotlin: 'kt',
+    swift: 'swift', ruby: 'rb', php: 'php',
+    scala: 'scala', racket: 'rkt', erlang: 'erl', elixir: 'ex'
   };
   return map[lang.toLowerCase()] || 'txt';
 }

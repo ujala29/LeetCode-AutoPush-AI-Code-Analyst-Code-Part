@@ -1,6 +1,3 @@
-// content.js - Runs on leetcode.com pages
-// Detects accepted submissions and sends them to the background script
-
 window.addEventListener('load', () => {
   setTimeout(() => {
     let lastProcessedSlug = null;
@@ -45,9 +42,7 @@ window.addEventListener('load', () => {
   }, 3000);
 });
 
-// Handle accepted submission
 async function handleAcceptedSubmission(slug, submissionId) {
-  console.log('[LeetCode AI] Detected accepted submission for:', slug, 'submissionId:', submissionId);
 
   try {
     const code = await getSubmissionCode(submissionId);
@@ -81,19 +76,16 @@ async function handleAcceptedSubmission(slug, submissionId) {
   }
 }
 
-// Extract slug from URL
 function getSlugFromURL() {
   const match = window.location.pathname.match(/\/problems\/([^\/]+)/);
   return match ? match[1] : null;
 }
 
-// Extract submission ID from URL
 function getSubmissionIdFromURL() {
   const match = window.location.pathname.match(/\/submissions\/(\d+)\//);
   return match ? match[1] : null;
 }
 
-// Fetch complete submission code from LeetCode API
 async function getSubmissionCode(submissionId) {
   if (!submissionId) {
     throw new Error('No submission ID available');
@@ -144,7 +136,6 @@ async function getSubmissionCode(submissionId) {
   throw new Error('No code found in submission response');
 }
 
-// Extract language from selector
 function getLanguage() {
   const langSelector = document.querySelector('[data-cy="lang-select"]') ||
                       document.querySelector('select') ||
@@ -157,7 +148,6 @@ function getLanguage() {
   return 'unknown';
 }
 
-// Extract problem metadata from DOM
 function getProblemMeta() {
   const titleElement = document.querySelector('[data-cy="question-title"]') ||
                       document.querySelector('h1') ||
@@ -176,13 +166,10 @@ function getProblemMeta() {
   };
 }
 
-// Show toast notification
 function showToast(message, type = 'info') {
-  // Remove existing toast
   const existing = document.getElementById('leetcode-ai-toast');
   if (existing) existing.remove();
 
-  // Create toast
   const toast = document.createElement('div');
   toast.id = 'leetcode-ai-toast';
   toast.style.cssText = `
@@ -204,7 +191,6 @@ function showToast(message, type = 'info') {
   toast.textContent = message;
   document.body.appendChild(toast);
 
-  // Auto remove after 4 seconds
   setTimeout(() => {
     if (toast.parentNode) {
       toast.style.animation = 'slideUp 0.3s ease';
@@ -214,7 +200,6 @@ function showToast(message, type = 'info') {
 }
 
 
-// Listen for processing complete messages
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'PROCESSING_COMPLETE') {
     if (message.status === 'success') {
@@ -225,7 +210,6 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
-// Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideDown {

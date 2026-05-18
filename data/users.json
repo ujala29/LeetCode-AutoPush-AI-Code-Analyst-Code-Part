@@ -1,0 +1,26 @@
+{
+  "aanyagupta980@gmail.com": {
+    "name": "aanyagupta980",
+    "streak": 1,
+    "weakTopics": [
+      "dynamic-programming",
+      "graphs",
+      "bfs",
+      "dfs",
+      "trees",
+      "binary-search",
+      "two-pointers",
+      "sliding-window",
+      "backtracking",
+      "greedy",
+      "heap",
+      "trie",
+      "segment-tree",
+      "monotonic-stack",
+      "union-find",
+      "bit-manipulation"
+    ],
+    "totalSolved": 2,
+    "updatedAt": "2026-05-18T20:05:49.644Z"
+  }
+}

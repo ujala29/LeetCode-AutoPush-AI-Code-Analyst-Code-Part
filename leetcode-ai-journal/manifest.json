@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "LeetCode AI Journal",
+  "version": "1.2",
+  "description": "Automatically analyze LeetCode solutions with AI and commit to GitHub with structured analytics and dashboard.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "notifications",
+    "identity"
+  ],
+  "oauth2": {
+    "client_id": "791838357537-41hbsfnbhvq1meha6fqf5nb5ok0dge9t.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "host_permissions": [
+    "https://leetcode.com/*",
+    "https://api.github.com/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://leetcode.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "LeetCode AI Journal"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["sidebar/sidebar.html"],
+      "matches": ["https://leetcode.com/*"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

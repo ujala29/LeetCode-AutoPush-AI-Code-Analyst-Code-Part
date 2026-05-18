@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mentor Chat</title>
+    <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+    <div class="chat-header">
+        <div class="chat-title">🤖 AI Mentor</div>
+        <div class="problem-slug" id="current-problem">Loading...</div>
+    </div>
+
+    <div class="chat-messages" id="messages">
+        <div class="message bot">
+            <div class="message-content">
+                Hi! I'm your personalized DSA mentor. I can see your current problem and code. Ask me anything or pick a quick option below!
+            </div>
+        </div>
+    </div>
+
+    <div class="typing-indicator" id="typing" style="display: none;">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <div class="quick-options" id="quick-options">
+        <div class="options-label">Quick Help</div>
+        <div class="options-grid">
+            <button class="option-btn" data-prompt="What are all the edge cases I must handle for this problem? List them clearly.">⚠️ Edge Cases</button>
+            <button class="option-btn" data-prompt="Give me a hint to move forward without spoiling the full solution.">💡 Hint</button>
+            <button class="option-btn" data-prompt="Review my current code and suggest improvements. Don't give the full solution.">👀 Review Code</button>
+            <button class="option-btn" data-prompt="Explain this problem in simple Hinglish (Hindi + English mix) with 2-3 examples.">🇮🇳 Hinglish</button>
+            <button class="option-btn" data-prompt="What similar problems should I practice to improve? Focus on my weak areas.">🎯 Similar Problems</button>
+            <button class="option-btn" data-prompt="Give me 3 more examples with input, output and step-by-step dry run.">📝 More Examples</button>
+            <button class="option-btn" data-prompt="What is the optimal time and space complexity for this problem and why?">⚡ Complexity</button>
+            <button class="option-btn" data-prompt="What algorithm pattern or technique is used here and when should I use it?">🧠 Pattern Used</button>
+        </div>
+    </div>
+
+    <div class="chat-input">
+        <input type="text" id="message-input" placeholder="Ask me anything about DSA..." maxlength="500">
+        <button id="send-btn" disabled>Send</button>
+    </div>
+
+    <script src="sidebar.js"></script>
+</body>
+</html>

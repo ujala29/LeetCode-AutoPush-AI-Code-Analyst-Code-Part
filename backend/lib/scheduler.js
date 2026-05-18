@@ -6,8 +6,8 @@ import { readUsers } from './userStore.js';
 import { sendDailyMotivation } from './mailer.js';
 
 export function startScheduler() {
-  // TEST: 1:20 AM local time. Change to '30 3 * * *' for production (9:00 AM IST)
-  cron.schedule('46 1 * * *', async () => {
+  // 9:00 AM IST = 03:30 UTC
+  cron.schedule('30 3 * * *', async () => {
     const users = readUsers();
     const emails = Object.entries(users);
     console.log(`[scheduler] Sending daily motivation to ${emails.length} users…`);
@@ -31,5 +31,5 @@ export function startScheduler() {
     console.log('[scheduler] Daily emails done.');
   });
 
-  console.log('[scheduler] Daily emails scheduled at 01:20 AM local (TEST mode)');
+  console.log('[scheduler] Daily emails scheduled at 09:00 AM IST (03:30 UTC)');
 }

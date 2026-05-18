@@ -3,3 +3,4 @@ node_modules/
 backend/data/
 backend/node_modules/
 *.log
+**/.git_backup/

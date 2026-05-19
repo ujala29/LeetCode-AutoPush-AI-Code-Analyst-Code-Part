@@ -102,9 +102,18 @@ async function sendMessageText(prompt, displayLabel) {
 
   } catch (error) {
     showTyping(false);
+    const msg = error.message || 'Unknown error';
+    let hint = '';
+    if (msg.includes('Not signed in')) {
+      hint = '\n\n👉 Open the extension popup and **Sign in with Google**.';
+    } else if (msg.includes('Cannot reach backend') || msg.includes('localhost')) {
+      hint = '\n\n👉 Open popup → Settings → set Backend URL to your Render URL.';
+    } else if (msg.includes('401') || msg.includes('Token')) {
+      hint = '\n\n👉 Your session expired. Open popup and sign in again.';
+    }
     messages.push({
       role: 'assistant',
-      content: 'Sorry, I encountered an error. Please check that your Backend URL is set correctly in the extension Settings tab.'
+      content: `Sorry, I encountered an error:\n\`${msg}\`${hint}`
     });
     renderMessages();
   }

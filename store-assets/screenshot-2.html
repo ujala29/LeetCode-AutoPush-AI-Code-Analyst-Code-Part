@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1280px; height: 800px; overflow: hidden;
+    background: #0d1117;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding: 30px;
+  }
+
+  /* AI Sidebar mock */
+  .sidebar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .sidebar-label {
+    font-size: 12px; color: #8b8b8b;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  .sidebar {
+    width: 340px;
+    background: #13131f;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(108,99,255,0.25);
+  }
+
+  .sidebar-header {
+    background: linear-gradient(135deg, #1e1e30, #252545);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid #2d2d44;
+  }
+  .bot-icon { font-size: 22px; }
+  .header-text { flex: 1; }
+  .header-title { font-size: 14px; font-weight: 700; }
+  .header-sub { font-size: 11px; color: #8b8b8b; }
+  .close-btn { color: #8b8b8b; font-size: 18px; }
+
+  .chat-area { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  .msg {
+    max-width: 85%; padding: 10px 12px;
+    border-radius: 12px; font-size: 12px; line-height: 1.5;
+  }
+  .msg.bot {
+    background: #252535; color: #c9d1d9;
+    border-radius: 4px 12px 12px 12px;
+    align-self: flex-start;
+  }
+  .msg.user {
+    background: linear-gradient(135deg, #6c63ff, #8b5cf6);
+    color: #fff;
+    border-radius: 12px 4px 12px 12px;
+    align-self: flex-end;
+  }
+
+  .quick-section { padding: 0 14px 10px; }
+  .quick-label { font-size: 10px; color: #8b8b8b; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .quick-btn {
+    background: #1e1e30; border: 1px solid #2d2d44;
+    border-radius: 8px; padding: 8px 10px;
+    font-size: 11px; color: #c9d1d9;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .input-row {
+    padding: 10px 14px;
+    display: flex; gap: 8px;
+    border-top: 1px solid #2d2d44;
+  }
+  .chat-input {
+    flex: 1; background: #1e1e30; border: 1px solid #2d2d44;
+    border-radius: 8px; padding: 8px 12px;
+    color: #8b8b8b; font-size: 12px;
+  }
+  .send-btn {
+    background: #6c63ff; color: #fff;
+    border: none; border-radius: 8px;
+    padding: 8px 14px; font-size: 12px; font-weight: 600;
+  }
+
+  /* Topics panel */
+  .topics-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+
+  .topics-card {
+    width: 320px;
+    background: #1e1e30;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,99,255,0.2);
+  }
+  .topics-header {
+    background: linear-gradient(135deg, #1e1e30, #252545);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid #2d2d44;
+  }
+  .topics-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #6c63ff, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700;
+  }
+  .topics-tabs {
+    display: flex; background: #131320;
+    border-bottom: 1px solid #2d2d44;
+  }
+  .ttab {
+    flex: 1; text-align: center;
+    padding: 9px 0; font-size: 11px; color: #8b8b8b;
+  }
+  .ttab.active { color: #6c63ff; border-bottom: 2px solid #6c63ff; }
+
+  .topics-body { padding: 14px; }
+  .topic-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .topic-name { font-size: 11px; color: #c9d1d9; width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-bg { flex: 1; height: 6px; background: #252535; border-radius: 3px; }
+  .bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #ef4444, #f97316); }
+  .topic-count { font-size: 11px; color: #8b8b8b; width: 16px; text-align: right; }
+
+  .weak-box {
+    background: #252535; border-radius: 8px;
+    padding: 10px 12px; margin-top: 4px;
+    font-size: 11px;
+  }
+  .weak-title { color: #8b8b8b; font-weight: 600; margin-bottom: 4px; }
+  .weak-tags { color: #f97316; }
+
+  /* Center divider */
+  .divider {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .divider-line { width: 1px; height: 120px; background: #2d2d44; }
+  .divider-text { font-size: 10px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Bottom label */
+  .page-label {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.4);
+    border-radius: 20px; padding: 6px 20px;
+    font-size: 11px; color: #a5a0ff;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- AI Sidebar -->
+<div class="sidebar-wrap">
+  <div class="sidebar-label">AI Mentor Chatbot</div>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="bot-icon">🤖</div>
+      <div class="header-text">
+        <div class="header-title">AI Mentor</div>
+        <div class="header-sub">Two Sum · Easy</div>
+      </div>
+      <div class="close-btn">✕</div>
+    </div>
+    <div class="chat-area">
+      <div class="msg bot">Hi! I'm your personalized DSA mentor. I can see your current problem and code. Ask me anything or pick a quick option below!</div>
+      <div class="msg user">What pattern should I use for Two Sum?</div>
+      <div class="msg bot">Use a <strong>Hash Map</strong> for O(n) time. Store each number as key and index as value. For each new number, check if <code style="background:#1e1e30;padding:1px 4px;border-radius:3px">target - num</code> is already in the map. You've used this pattern before in your solved problems!</div>
+    </div>
+    <div class="quick-section">
+      <div class="quick-label">Quick Help</div>
+      <div class="quick-grid">
+        <div class="quick-btn">⚠️ Edge Cases</div>
+        <div class="quick-btn">💡 Hint</div>
+        <div class="quick-btn">👁️ Review Code</div>
+        <div class="quick-btn"><span style="font-size:9px;font-weight:700;background:#6c63ff;padding:1px 4px;border-radius:3px">IN</span> Hinglish</div>
+        <div class="quick-btn">🎯 Similar Problems</div>
+        <div class="quick-btn">📋 More Examples</div>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="chat-input">Ask me anything about DSA...</div>
+      <button class="send-btn">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Divider -->
+<div class="divider">
+  <div class="divider-line"></div>
+  <div class="divider-text">+</div>
+  <div class="divider-line"></div>
+</div>
+
+<!-- Topics popup -->
+<div class="topics-wrap">
+  <div class="sidebar-label">Progress Dashboard</div>
+  <div class="topics-card">
+    <div class="topics-header">
+      <div class="topics-avatar">A</div>
+      <div class="header-text">
+        <div style="font-size:13px;font-weight:600">Aanya Gupta</div>
+        <div style="font-size:10px;color:#8b8b8b">aanyagupta980@gmail.com</div>
+      </div>
+    </div>
+    <div class="topics-tabs">
+      <div class="ttab">Dashboard</div>
+      <div class="ttab active">Topics</div>
+      <div class="ttab">Settings</div>
+    </div>
+    <div class="topics-body">
+      <div class="topic-row">
+        <div class="topic-name">Backtracking</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div>
+        <div class="topic-count">2</div>
+      </div>
+      <div class="topic-row">
+        <div class="topic-name">String</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div>
+        <div class="topic-count">2</div>
+      </div>
+      <div class="topic-row">
+        <div class="topic-name">String Manipulation</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div>
+        <div class="topic-count">2</div>
+      </div>
+      <div class="topic-row">
+        <div class="topic-name">Array</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:50%"></div></div>
+        <div class="topic-count">1</div>
+      </div>
+      <div class="topic-row">
+        <div class="topic-name">Hash Table</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:50%"></div></div>
+        <div class="topic-count">1</div>
+      </div>
+      <div class="topic-row">
+        <div class="topic-name">Recursion</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:50%"></div></div>
+        <div class="topic-count">1</div>
+      </div>
+      <div class="weak-box">
+        <div class="weak-title">Weak Areas</div>
+        <div class="weak-tags">dynamic-programming, graphs, bfs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-label">AI Chatbot with problem context · Topic analytics · Personalized weak areas</div>
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1400px; height: 560px; overflow: hidden;
+    background: #0d1117;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #2d2d44 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0.35;
+  }
+
+  .glow-left {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(108,99,255,0.18) 0%, transparent 65%);
+    top: 50%; left: 10%; transform: translate(-50%, -50%);
+  }
+  .glow-right {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 65%);
+    top: 50%; right: 5%; transform: translateY(-50%);
+  }
+
+  /* LEFT — text */
+  .left {
+    position: relative;
+    width: 520px;
+    padding: 0 0 0 80px;
+    flex-shrink: 0;
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.35);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px; color: #a5a0ff;
+    font-weight: 600; letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 46px; font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  h1 .line1 { display: block; color: #fff; }
+  h1 .line2 {
+    display: block;
+    background: linear-gradient(135deg, #6c63ff, #a855f7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .tagline {
+    font-size: 15px; color: #8b8b9a; line-height: 1.6;
+    margin-bottom: 28px; max-width: 380px;
+  }
+
+  .feature-list { display: flex; flex-direction: column; gap: 10px; }
+  .feature-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: #c9d1d9;
+  }
+  .feature-icon {
+    width: 28px; height: 28px;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+
+  /* RIGHT — cards */
+  .right {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding-right: 50px;
+  }
+
+  .card-col { display: flex; flex-direction: column; gap: 14px; }
+  .card-col.offset { margin-top: 40px; }
+
+  .mini-card {
+    background: #1e1e30;
+    border: 1px solid #2d2d44;
+    border-radius: 12px;
+    padding: 14px 16px;
+    width: 210px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .mini-card.highlight {
+    border-color: rgba(108,99,255,0.4);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(108,99,255,0.1);
+  }
+
+  .card-icon { font-size: 20px; margin-bottom: 8px; }
+  .card-title { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .card-desc { font-size: 10px; color: #8b8b8b; line-height: 1.5; }
+
+  .stat-row { display: flex; gap: 8px; margin-top: 8px; }
+  .stat-chip {
+    flex: 1; background: #252535; border-radius: 6px;
+    padding: 6px; text-align: center;
+  }
+  .stat-num { font-size: 16px; font-weight: 700; color: #6c63ff; }
+  .stat-lbl { font-size: 9px; color: #8b8b8b; }
+
+  .accepted {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(44,186,0,0.1); border: 1px solid rgba(44,186,0,0.3);
+    border-radius: 6px; padding: 5px 8px; margin-top: 8px;
+  }
+  .accepted-dot { width: 6px; height: 6px; border-radius: 50%; background: #2cba00; }
+  .accepted-text { font-size: 10px; color: #2cba00; font-weight: 600; }
+
+  .github-commit {
+    background: #0d1117; border: 1px solid #2d2d44;
+    border-radius: 6px; padding: 6px 8px; margin-top: 8px;
+    font-family: monospace; font-size: 9px; color: #8b8b8b;
+  }
+  .commit-line { color: #2cba00; }
+  .commit-path { color: #a5d6ff; }
+
+  .topic-bars { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
+  .tbar { display: flex; align-items: center; gap: 6px; }
+  .tname { font-size: 9px; color: #8b8b8b; width: 70px; }
+  .tbg { flex: 1; height: 4px; background: #252535; border-radius: 2px; }
+  .tfill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #ef4444, #f97316); }
+</style>
+</head>
+<body>
+  <div class="glow-left"></div>
+  <div class="glow-right"></div>
+
+  <!-- LEFT TEXT -->
+  <div class="left">
+    <div class="eyebrow">⚡ Chrome Extension · Manifest V3</div>
+    <h1>
+      <span class="line1">LeetCode AI</span>
+      <span class="line2">Journal</span>
+    </h1>
+    <p class="tagline">Automatically analyzes your accepted solutions with Groq AI, commits structured notes to GitHub, and coaches you with a personalized DSA mentor.</p>
+    <div class="feature-list">
+      <div class="feature-item">
+        <div class="feature-icon">🎯</div>
+        Auto-detects accepted submissions
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🤖</div>
+        AI analysis — approach, complexity, patterns
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📦</div>
+        Commits to GitHub automatically
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">💬</div>
+        In-page DSA mentor chatbot
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📧</div>
+        Daily motivation emails + streak tracking
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT CARDS -->
+  <div class="right">
+    <div class="card-col">
+      <div class="mini-card highlight">
+        <div class="card-icon">✅</div>
+        <div class="card-title">Accepted → Auto Captured</div>
+        <div class="card-desc">Detects your "Accepted" submission instantly — no manual action needed.</div>
+        <div class="accepted">
+          <div class="accepted-dot"></div>
+          <div class="accepted-text">Accepted · Runtime 52ms</div>
+        </div>
+      </div>
+      <div class="mini-card">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Topics & Streaks</div>
+        <div class="card-desc">Track your strongest and weakest DSA topics with visual analytics.</div>
+        <div class="topic-bars">
+          <div class="tbar"><div class="tname">Backtracking</div><div class="tbg"><div class="tfill" style="width:100%"></div></div></div>
+          <div class="tbar"><div class="tname">Array</div><div class="tbg"><div class="tfill" style="width:60%"></div></div></div>
+          <div class="tbar"><div class="tname">Hash Table</div><div class="tbg"><div class="tfill" style="width:50%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-col offset">
+      <div class="mini-card highlight">
+        <div class="card-icon">🤖</div>
+        <div class="card-title">Groq AI Analysis</div>
+        <div class="card-desc">LLaMA 3.3 70B analyzes approach, complexity & patterns.</div>
+        <div class="stat-row">
+          <div class="stat-chip"><div class="stat-num">O(n)</div><div class="stat-lbl">Time</div></div>
+          <div class="stat-chip"><div class="stat-num">O(n)</div><div class="stat-lbl">Space</div></div>
+          <div class="stat-chip"><div class="stat-num">🔑</div><div class="stat-lbl">Hash Map</div></div>
+        </div>
+      </div>
+      <div class="mini-card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">Auto GitHub Commit</div>
+        <div class="card-desc">Structured solution notes pushed to your repo automatically.</div>
+        <div class="github-commit">
+          <div class="commit-line">+ problems/two-sum/</div>
+          <div class="commit-path">&nbsp;&nbsp;solution.py</div>
+          <div class="commit-path">&nbsp;&nbsp;README.md</div>
+          <div style="color:#8b8b8b;margin-top:3px">✓ committed 2s ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

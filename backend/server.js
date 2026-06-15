@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { verifyGoogleToken } from './lib/auth.js';
-import { startScheduler } from './lib/scheduler.js';
+import { startScheduler, sendAllEmails } from './lib/scheduler.js';
 import analyzeRouter from './routes/analyze.js';
 import chatRouter from './routes/chat.js';
 import registerRouter from './routes/register.js';
@@ -49,6 +49,19 @@ app.get('/privacy', (_, res) => {
 <h2>Contact</h2>
 <p><a href="mailto:aanyagupta980@gmail.com">aanyagupta980@gmail.com</a></p>
 </body></html>`);
+});
+
+app.post('/api/trigger-emails', async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.headers.authorization !== `Bearer ${secret}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const count = await sendAllEmails();
+    res.json({ ok: true, sent: count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Auth middleware — all /api/* routes require a valid Google OAuth token

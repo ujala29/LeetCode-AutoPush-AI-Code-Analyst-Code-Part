@@ -5,8 +5,6 @@
   "description": "Automatically analyze LeetCode solutions with AI and commit to GitHub with structured analytics and dashboard.",
   "permissions": [
     "storage",
-    "activeTab",
-    "notifications",
     "identity"
   ],
   "oauth2": {

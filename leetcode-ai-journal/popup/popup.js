@@ -39,7 +39,7 @@ function setupTabs() {
 }
 
 async function setupSettings() {
-  const result = await chrome.storage.local.get(['backendUrl', 'githubToken']);
+  const result = await chrome.storage.local.get(['backendUrl', 'githubRepo', 'githubToken']);
 
   // Backend URL — show current value (it's not secret)
   const backendInput = document.getElementById('backend-url');
@@ -48,6 +48,13 @@ async function setupSettings() {
     document.getElementById('backend-url-status').style.display = 'inline';
   } else {
     backendInput.placeholder = 'http://localhost:3000';
+  }
+
+  // GitHub repo — show current value (it's not secret)
+  const repoInput = document.getElementById('github-repo');
+  if (result.githubRepo) {
+    repoInput.value = result.githubRepo;
+    document.getElementById('github-repo-status').style.display = 'inline';
   }
 
   // GitHub token — mask it, just signal configured/not
@@ -82,12 +89,17 @@ function applyKeyStatus(inputId, isSaved) {
 
 async function saveSettings() {
   const backendUrlValue = document.getElementById('backend-url').value.trim();
+  const repoValue = document.getElementById('github-repo').value.trim();
   const ghValue = document.getElementById('github-token').value.trim();
 
-  const current = await chrome.storage.local.get(['backendUrl', 'githubToken']);
+  const current = await chrome.storage.local.get(['backendUrl', 'githubRepo', 'githubToken']);
 
   if (!backendUrlValue && !current.backendUrl) {
     showSaveStatus('Backend URL is required', 'error');
+    return;
+  }
+  if (!repoValue && !current.githubRepo) {
+    showSaveStatus('GitHub repo is required (e.g. username/repo-name)', 'error');
     return;
   }
   if (!ghValue && !current.githubToken) {
@@ -98,6 +110,7 @@ async function saveSettings() {
   try {
     const updates = {};
     if (backendUrlValue) updates.backendUrl = backendUrlValue;
+    if (repoValue) updates.githubRepo = repoValue;
     if (ghValue) updates.githubToken = await encryptValue(ghValue);
 
     if (Object.keys(updates).length > 0) {
@@ -107,6 +120,9 @@ async function saveSettings() {
     // Reflect saved state without exposing values
     if (backendUrlValue) {
       document.getElementById('backend-url-status').style.display = 'inline';
+    }
+    if (repoValue) {
+      document.getElementById('github-repo-status').style.display = 'inline';
     }
     applyKeyStatus('github-token', true);
 

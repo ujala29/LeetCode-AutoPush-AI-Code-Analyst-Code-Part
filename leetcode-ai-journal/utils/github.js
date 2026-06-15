@@ -1,22 +1,23 @@
 // utils/github.js
 import { decryptValue } from './crypto.js';
 
-const OWNER = 'ujala29';
-const REPO = 'LeetCode-AutoPush-AI-Code-Analyst';
-
 export async function commitToGitHub(files, commitMessage) {
-  const { githubToken: encryptedToken } = await chrome.storage.local.get(['githubToken']);
+  const { githubToken: encryptedToken, githubRepo } = await chrome.storage.local.get(['githubToken', 'githubRepo']);
   if (!encryptedToken) {
     throw new Error('GitHub token not configured. Please add it in Settings.');
   }
+  if (!githubRepo || !githubRepo.includes('/')) {
+    throw new Error('GitHub repo not configured. Please set it in Settings (e.g. username/repo-name).');
+  }
+  const [owner, repo] = githubRepo.split('/');
   const token = await decryptValue(encryptedToken);
 
   for (const file of files) {
-    await commitFileWithRetry(token, file, commitMessage);
+    await commitFileWithRetry(token, owner, repo, file, commitMessage);
   }
 }
 
-async function commitFileWithRetry(token, file, commitMessage, maxAttempts = 4) {
+async function commitFileWithRetry(token, owner, repo, file, commitMessage, maxAttempts = 4) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     if (attempt > 0) {
       await new Promise(r => setTimeout(r, 1000 * attempt)); // 1s, 2s, 3s back-off
@@ -26,7 +27,7 @@ async function commitFileWithRetry(token, file, commitMessage, maxAttempts = 4) 
     let sha = null;
     try {
       const res = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${file.path}`,
+        `https://api.github.com/repos/${owner}/${repo}/contents/${file.path}`,
         { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
       );
       if (res.ok) sha = (await res.json()).sha;
@@ -35,7 +36,7 @@ async function commitFileWithRetry(token, file, commitMessage, maxAttempts = 4) 
     }
 
     const res = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${file.path}`,
+      `https://api.github.com/repos/${owner}/${repo}/contents/${file.path}`,
       {
         method: 'PUT',
         headers: {
@@ -61,7 +62,7 @@ async function commitFileWithRetry(token, file, commitMessage, maxAttempts = 4) 
       throw new Error('GitHub rate limit hit or token lacks repo write permission.');
     }
     if (res.status === 404) {
-      throw new Error(`GitHub repo not found — verify that ${OWNER}/${REPO} exists and your token has access.`);
+      throw new Error(`GitHub repo not found — verify that ${owner}/${repo} exists and your token has access.`);
     }
 
     if (res.status === 409 && attempt < maxAttempts - 1) {

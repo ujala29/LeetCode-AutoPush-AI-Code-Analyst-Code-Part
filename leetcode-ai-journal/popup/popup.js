@@ -41,12 +41,6 @@ function setupTabs() {
 async function setupSettings() {
   const result = await chrome.storage.local.get(['backendUrl', 'githubRepo', 'githubToken']);
 
-  // Backend URL — pre-fill with production URL for new users
-  const backendInput = document.getElementById('backend-url');
-  const savedUrl = result.backendUrl || 'https://leetcode-ai-backend.onrender.com';
-  backendInput.value = savedUrl;
-  document.getElementById('backend-url-status').style.display = 'inline';
-
   // GitHub repo — show current value (it's not secret)
   const repoInput = document.getElementById('github-repo');
   if (result.githubRepo) {
@@ -91,10 +85,6 @@ async function saveSettings() {
 
   const current = await chrome.storage.local.get(['backendUrl', 'githubRepo', 'githubToken']);
 
-  if (!backendUrlValue && !current.backendUrl) {
-    showSaveStatus('Backend URL is required', 'error');
-    return;
-  }
   if (!repoValue && !current.githubRepo) {
     showSaveStatus('GitHub repo is required (e.g. username/repo-name)', 'error');
     return;
@@ -106,7 +96,6 @@ async function saveSettings() {
 
   try {
     const updates = {};
-    if (backendUrlValue) updates.backendUrl = backendUrlValue;
     if (repoValue) updates.githubRepo = repoValue;
     if (ghValue) updates.githubToken = await encryptValue(ghValue);
 
@@ -114,10 +103,6 @@ async function saveSettings() {
       await chrome.storage.local.set(updates);
     }
 
-    // Reflect saved state without exposing values
-    if (backendUrlValue) {
-      document.getElementById('backend-url-status').style.display = 'inline';
-    }
     if (repoValue) {
       document.getElementById('github-repo-status').style.display = 'inline';
     }

@@ -41,14 +41,11 @@ function setupTabs() {
 async function setupSettings() {
   const result = await chrome.storage.local.get(['backendUrl', 'githubRepo', 'githubToken']);
 
-  // Backend URL — show current value (it's not secret)
+  // Backend URL — pre-fill with production URL for new users
   const backendInput = document.getElementById('backend-url');
-  if (result.backendUrl) {
-    backendInput.value = result.backendUrl;
-    document.getElementById('backend-url-status').style.display = 'inline';
-  } else {
-    backendInput.placeholder = 'http://localhost:3000';
-  }
+  const savedUrl = result.backendUrl || 'https://leetcode-ai-backend.onrender.com';
+  backendInput.value = savedUrl;
+  document.getElementById('backend-url-status').style.display = 'inline';
 
   // GitHub repo — show current value (it's not secret)
   const repoInput = document.getElementById('github-repo');

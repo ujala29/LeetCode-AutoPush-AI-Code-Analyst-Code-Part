@@ -5,6 +5,18 @@ import { updateTracker } from './utils/tracker.js';
 import { buildReadme } from './utils/readme-builder.js';
 import { getToken } from './utils/auth.js';
 
+const DEFAULT_BACKEND_URL = 'https://leetcode-ai-backend.onrender.com';
+
+// Set defaults for new installs so users don't need to configure Backend URL
+chrome.runtime.onInstalled.addListener(async ({ reason }) => {
+  if (reason === 'install') {
+    const { backendUrl } = await chrome.storage.local.get(['backendUrl']);
+    if (!backendUrl) {
+      await chrome.storage.local.set({ backendUrl: DEFAULT_BACKEND_URL });
+    }
+  }
+});
+
 // In-memory dedup — also persisted to storage so SW restarts don't cause double-processing
 const processedSubmissions = new Set();
 
@@ -169,7 +181,7 @@ Auto-generated dashboard from your LeetCode solving journey.
 
 async function syncUserToBackend(tracker) {
   const { backendUrl } = await chrome.storage.local.get(['backendUrl']);
-  const base = (backendUrl || 'http://localhost:3000').replace(/\/$/, '');
+  const base = (backendUrl || DEFAULT_BACKEND_URL).replace(/\/$/, '');
   const token = await getToken();
   if (!token) return;
   await fetch(`${base}/api/register`, {

@@ -79,7 +79,6 @@ function applyKeyStatus(inputId, isSaved) {
 }
 
 async function saveSettings() {
-  const backendUrlValue = document.getElementById('backend-url').value.trim();
   const repoValue = document.getElementById('github-repo').value.trim();
   const ghValue = document.getElementById('github-token').value.trim();
 
